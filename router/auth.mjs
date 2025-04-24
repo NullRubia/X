@@ -9,6 +9,7 @@ router.post("/singup", authController.create);
 //로그인
 //http://127.0.0.1:8080/auth/login
 router.post("/login", authController.login);
-//로그인 유지
-
+//로그인 유지(세션 확인, 로그아웃)
+router.get("/me", authController.checkSession);
+router.get("/logout", authController.logout);
 export default router;

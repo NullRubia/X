@@ -61,11 +61,11 @@ export async function getById(id) {
 // 포스트 작성
 export async function create(userid, name, text) {
   const post = {
-    id: Date.now.toString(),
+    id: Date.now().toString(),
     userid,
     name,
     text,
-    createdAt: Date.now.toString(),
+    createdAt: Date.now().toString(),
   };
   posts = [post, ...posts];
   return posts;

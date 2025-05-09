@@ -8,13 +8,13 @@ const secretKey = config.jwt.secretKey;
 const bcryptSaltRounds = config.bcrypt.saltRounds;
 const jwtExpiresInDays = config.jwt.expiresInSec;
 
-async function createJwtToken(id) {
-  return jwt.sign({ id }, secretKey, { expiresIn: jwtExpiresInDays });
+async function createJwtToken(idx) {
+  return jwt.sign({ idx }, secretKey, { expiresIn: jwtExpiresInDays });
 }
 
 // 유저생성
 export async function create(req, res, next) {
-  const { userid, password, name, email } = req.body;
+  const { userid, password, name, email, url } = req.body;
 
   //유저중복 체크
   const found = await authRepository.findByUserid(userid);
@@ -23,9 +23,24 @@ export async function create(req, res, next) {
   }
 
   //해시값으로 체크&토큰
+  /*
   const hashed = bcrypt.hashSync(password, bcryptSaltRounds);
-  const users = await authRepository.createUser(userid, hashed, name, email);
-  const token = await createJwtToken(users.id);
+  const users = await authRepository.createUser(
+    userid,
+    hashed,
+    name,
+    email,
+    url
+  );
+  */
+  const users = await authRepository.createUser({
+    userid,
+    password: hashed,
+    name,
+    email,
+    url,
+  });
+  const token = await createJwtToken(users.idx);
   if (users) {
     res.status(201).json({ token, userid });
   }
@@ -45,7 +60,8 @@ export async function login(req, res, next) {
   }
 
   //토큰 생성 및 토큰 보내기
-  const token = await createJwtToken(user.id);
+  const token = await createJwtToken(user.idx);
+  console.log(user.idx);
   res.status(200).json({ token, userid });
 }
 
@@ -59,7 +75,7 @@ export async function verify(req, res, next) {
   }
 }
 export async function me(req, res, next) {
-  const user = await authRepository.findByid(req.id);
+  const user = await authRepository.findByid(req.idx);
   if (!user) {
     return res.status(404).json({ message: "일치하는 사용자가 없음" });
   }

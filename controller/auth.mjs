@@ -14,7 +14,7 @@ async function createJwtToken(id) {
 
 // 유저생성
 export async function create(req, res, next) {
-  const { userid, password, name, email } = req.body;
+  const { userid, password, name, email, url } = req.body;
 
   //유저중복 체크
   const found = await authRepository.findByUserid(userid);
@@ -24,7 +24,13 @@ export async function create(req, res, next) {
 
   //해시값으로 체크&토큰
   const hashed = bcrypt.hashSync(password, bcryptSaltRounds);
-  const users = await authRepository.createUser(userid, hashed, name, email);
+  const users = await authRepository.createUser({
+    userid,
+    password: hashed,
+    name,
+    email,
+    url,
+  });
   const token = await createJwtToken(users.id);
   if (users) {
     res.status(201).json({ token, userid });
